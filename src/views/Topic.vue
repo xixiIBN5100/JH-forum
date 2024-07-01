@@ -47,8 +47,8 @@ watch(tagsChecked, () => {
         store.commit("refreshTopicFollow")
     }
 });
-const tagsEditText = computed({  
-    get: () => {  
+const tagsEditText = computed({
+    get: () => {
         let text = "编辑";
         if (tagsChecked.value) {
             text = "保存";

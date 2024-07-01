@@ -50,7 +50,6 @@
                     >
                         #{{ tag.tag }}
                     </router-link>
-
                     <div class="post-num">
                         {{ formatQuoteNum(tag.quote_num) }}
                     </div>
@@ -59,24 +58,6 @@
         </n-card>
         <n-card class="copyright-wrap" embedded :bordered="false" size="small">
             <div class="copyright">&copy; {{ store.state.profile.copyrightTop }}</div>
-            <div>
-                <n-space>
-                    <a
-                        :href="store.state.profile.copyrightLeftLink"
-                        target="_blank"
-                        class="hash-link"
-                    >
-                        {{ store.state.profile.copyrightLeft }}
-                    </a>
-                    <a
-                        :href="store.state.profile.copyrightRightLink"
-                        target="_blank"
-                        class="hash-link"
-                    >
-                        {{ store.state.profile.copyrightRight }}
-                    </a>
-                </n-space>
-            </div>
         </n-card>
         <div class="site-info" v-if="store.state.userInfo.is_admin" ref="userInfoElement">
             <span class="site-info-item">{{ registerUserCount }} 注册用户，{{ onlineUserCount }} 人在线，最高在线 {{ historyMaxOnline }} 人，站点上线于 {{ formatRelativeTime(serverUpTime) }}</span>
@@ -151,8 +132,8 @@ const handleSearch = () => {
         },
     });
 };
-const showFollowTopics = computed({  
-    get: () => {     
+const showFollowTopics = computed({
+    get: () => {
         return store.state.userLogined && followTags.value.length !==0;
     },
     set: (newVal) => {
@@ -162,7 +143,7 @@ const showFollowTopics = computed({
 watch(
     () => ({
         refreshTopicFollow: store.state.refreshTopicFollow,
-        userLogined: store.state.userLogined 
+        userLogined: store.state.userLogined
     }),
     (to, from) => {
         if (to.refreshTopicFollow !== from.refreshTopicFollow || to.userLogined) {

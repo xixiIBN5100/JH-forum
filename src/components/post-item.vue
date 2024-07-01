@@ -69,6 +69,7 @@
                     </n-dropdown>
                 </div>
             </template>
+
             <template #description v-if="post.texts.length > 0">
                 <span
                     v-for="content in post.texts"
@@ -80,7 +81,7 @@
             </template>
 
             <template #footer>
-                <post-attachment 
+                <post-attachment
                     v-if="post.attachments.length > 0"
                     :attachments="post.attachments" />
                 <post-attachment
@@ -128,7 +129,7 @@
 import { h, ref, computed } from 'vue';
 import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
-import { NIcon } from 'naive-ui'
+import {NIcon, useDialog} from 'naive-ui'
 import type { Component } from 'vue'
 import type { DropdownOption } from 'naive-ui';
 import { formatPrettyDate } from '@/utils/formatTime';
@@ -147,9 +148,11 @@ import {
     PersonRemoveOutline,
     BodyOutline,
     WalkOutline,
+    AlertCircleOutline,
 } from '@vicons/ionicons5';
 import { MoreHorizFilled } from '@vicons/material';
 import copy from "copy-to-clipboard";
+import {deleteFriend} from "@/api/user";
 
 const router = useRouter();
 const store = useStore();
@@ -160,7 +163,7 @@ const props = withDefaults(defineProps<{
     addFriendAction: boolean,
     addFollowAction: boolean,
 }>(), {});
-
+const dialog = useDialog();
 const emit = defineEmits<{
     (e: 'send-whisper', user: Item.UserInfo): void
     (e: 'handle-follow-action', user: Item.PostProps): void
@@ -219,11 +222,19 @@ const tweetOptions = computed(() => {
         key: 'copyTweetLink',
         icon: renderIcon(ShareSocialOutline),
     });
+
+    if(!props.isOwner){
+      options.push({
+        label: '举报帖子',
+        key: 'report',
+        icon: renderIcon(AlertCircleOutline),
+      });
+    }
     return options;
 });
 
 const handleTweetAction = async (
-    item: 'copyTweetLink' | 'whisper' | 'follow' | 'unfollow' | 'delete' | 'requesting'
+    item: 'copyTweetLink' | 'whisper' | 'follow' | 'unfollow' | 'delete' | 'requesting' | 'report'
 ) => {
     switch (item) {
         case 'copyTweetLink':
@@ -240,6 +251,20 @@ const handleTweetAction = async (
         case 'follow':
         case 'unfollow':
             emit('handle-follow-action', props.post);
+            break;
+        case 'report':
+            dialog.warning({
+                title: '举报帖子',
+                content: '举报后，帖子将被审查，请勿恶意举报',
+                positiveText: '举报',
+                negativeText: '取消',
+                onPositiveClick: () => {
+                    store.dispatch('report/reportPost', {
+                        post_id: props.post.id,
+                        reason: '其他',
+                    });
+                },
+            });
             break;
         default:
             break;
@@ -365,6 +390,8 @@ const doClickText = (e: MouseEvent, id: number) => {
         goPostDetail(id);
     }
 };
+
+
 </script>
 
 <style lang="less">
@@ -407,11 +434,11 @@ const doClickText = (e: MouseEvent, id: number) => {
             margin-right: 10px;
         }
     }
-    
+
     &:hover {
         background: #f7f9f9;
     }
-    
+
     &.hover {
                 cursor: pointer;
     }
